@@ -4,7 +4,10 @@ from openai import OpenAI
 
 app = Flask(__name__)
 app.secret_key = "secret_key_for_session"
-client = OpenAI(api_key="")
+import os
+api_key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI(api_key=api_key)
 
 # 最大履歴数と質問回数制限
 MAX_HISTORY = 20
@@ -66,3 +69,4 @@ def reset():
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)
+
