@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>坂本龍馬風チャット</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #000; /* 黒背景 */
+            color: #fff; /* 白文字 */
+            margin: 0;
+            padding: 0;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 600px;
+            margin: 30px auto;
+            background: #111;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(255,255,255,0.1);
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+        }
+        #chat-box {
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            background: #222;
+        }
+        .message {
+            margin: 10px 0;
+            display: flex;
+        }
+        .user {
+            justify-content: flex-end;
+        }
+        .bot {
+            justify-content: flex-start;
+        }
+        .bubble {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .user .bubble {
+            background: #0078d7;
+            color: #fff;
+            border-bottom-right-radius: 0;
+        }
+        .bot .bubble {
+            background: #333;
+            color: #fff;
+            border-bottom-left-radius: 0;
+        }
+        .input-area {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            background: #000;
+            color: #fff;
+        }
+        button {
+            padding: 10px 20px;
+            background: #0078d7;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005fa3;
+        }
+        /* ローディングアニメーション */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .loading span {
+            display: inline-block;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        /* レスポンシブ対応 */
+        @media (max-width: 600px) {
+            .chat-container {
+                width: 95%;
+                padding: 10px;
+            }
+            #chat-box {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>坂本龍馬風チャット</h1>
+        <div id="chat-box"></div>
+        <div class="loading">龍馬が考え中<span>...</span></div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="営業の悩みを入力...">
+            <button onclick="sendMessage()">送信</button>
+            <button onclick="resetChat()" style="background:#444;">リセット</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('user-input').value.trim();
+            if (!input) return;
+
+            const chatBox = document.getElementById('chat-box');
+            const loading = document.querySelector('.loading');
+
+            chatBox.innerHTML += `<div class="message user"><div class="bubble">あなた: ${input}</div></div>`;
+            document.getElementById('user-input').value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            loading.style.display = 'block'; // ローディング表示
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: input })
+            });
+            const data = await response.json();
+
+            loading.style.display = 'none'; // ローディング非表示
+            chatBox.innerHTML += `<div class="message bot"><div class="bubble">龍馬: ${data.reply}</div></div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function resetChat() {
+            await fetch('/reset', { method: 'POST' });
+            document.getElementById('chat-box').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
